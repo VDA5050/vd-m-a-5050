@@ -2,8 +2,9 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "#state",
     "title": "state",
-    "description": "all encompassing state of the AGV",
+    "description": "all encompassing state of the AGV. Document version: 4.0.0",
     "documentVersion": "4.0.0",
+    "subtopic": "/state",
     "type": "object",
     "properties": {
         "headerId": {
@@ -34,19 +35,46 @@
         },
         "orderId": {
             "type": "string",
-            "description": "Order identification. This is to be used to identify multiple order messages that belong to the same order. Can be set to 'none' if idle."
+            "description": "Unique order identification of the current order or the previous finished order. The orderId is kept until a new order is received. Empty string (â€œâ€) if no previous orderId is available. "
         },
         "orderUpdateId": {
             "type": "number",
-            "description": "ORder update identification to identify that an order update has been accepted by the AGV."
+            "description": "Order Update Identification to identify that an order update has been accepted by the AGV. â€œ0â€ if no previous orderUpdateId is available."
+        },
+        "zoneSetId": {
+            "type": "string",
+            "description": "Unique ID of the zone set that the AGV currently uses for path planning. Must be the same as the one used in the order, otherwise the AGV is to reject the order.\nOptional: If the AGV does not use zones, this field can be omitted."
         },
         "lastNodeId": {
             "type": "string",
-            "description": "nodeId of last reached node or current node."
+            "description": "nodeID of last reached node or, if AGV is currently on a node, current node (e. g. â€œnode7â€). Empty string (â€œâ€) if no lastNodeId is available."
         },
         "lastNodeSequenceId": {
             "type": "number",
-            "description": "sequenceId of the last reached node, of, if the AGV is currently on a node, sequenceId of the current node.\n-1: AGV is idle"
+            "description": "sequenceId of the last reached node or, if the AGV is currently on a node, sequenceId of current node.\nâ€œ0â€ if no lastNodeSequenceId is available. "
+        },
+        "driving": {
+            "type": "boolean",
+            "description": "True: indicates that the AGV is driving and/or rotating. Other movements of the AGV (e.g. lift movements) are not included here.\nFalse: indicates that the AGV is neither driving nor rotating "
+        },
+        "newBaseRequest": {
+            "type": "boolean",
+            "description": "True: AGV is almost at the end of the base and will reduce speed if no new base is transmitted. Trigger for MC to send ne base\nFalse: no base update required "
+        },
+        "distanceSinceLastNode": {
+            "type": "number",
+            "description": "Used by line guided vehicles to indicate the distance it has been driving past the â€žlastNodeIdâ€œ.\nDistance is in meters"
+        },
+        "operatingMode": {
+            "type": "string",
+            "description": "Current operating mode of the AGV.",
+            "enum": [
+                "automatic",
+                "semi-automatic",
+                "manual",
+                "service",
+                "teachin"
+            ]
         },
         "nodeStates": {
             "type": "array",
@@ -68,10 +96,10 @@
                         "type": "string",
                         "description": "Verbose node description"
                     },
-                    "position": {
+                    "nodePosition": {
                         "type": "object",
                         "title": "nodePosition",
-                        "description": "Position of the node",
+                        "description": "Node position. The object is defined in chapter 5.4 Topic: Order (from master control to AGV).\nOptional:\nMaster control has this information. Can be sent additionally, e. g. for debugging purposes. ",
                         "properties": {
                             "x": {
                                 "type": "number"
@@ -107,7 +135,7 @@
         },
         "edgeStates": {
             "type": "array",
-            "description": "Information about the edges the AGV still has to drive over.",
+            "description": "Information about the edges the AGV still has to drive over. Empty list if the AGV is idle.",
             "items": {
                 "type": "object",
                 "title": "edgeState",
@@ -128,6 +156,55 @@
                     "released": {
                         "type": "boolean",
                         "description": "True: Edge is part of base. False: Edge is part of horizon."
+                    },
+                    "trajectory": {
+                        "type": "object",
+                        "description": "The trajectory is to be communicated as a NURBS and is defined in chapter 5.4 Topic: Order (from master control to AGV).\nTrajectory segments are from the point where the AGV starts to enter the edge until the point where it reports that the next node was traversed. ",
+                        "properties": {
+                            "degree": {
+                                "type": "number",
+                                "description": "The degree of the NURBS."
+                            },
+                            "knotVector": {
+                                "type": "array",
+                                "description": "Sequence of parameter values that determine where and how the control points affect the NURBS curve. knotVector has size of number of control points + degree + 1",
+                                "items": {
+                                    "type": "number",
+                                    "maximum": 1.0,
+                                    "minimum": 0.0
+                                }
+                            },
+                            "controlPoints": {
+                                "type": "array",
+                                "description": "List of JSON controlPoint objects defining the control points of the NURBS. This includes the start and end point.",
+                                "items": {
+                                    "type": "object",
+                                    "title": "controlPoint",
+                                    "properties": {
+                                        "x": {
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "type": "number"
+                                        },
+                                        "weight": {
+                                            "type": "number",
+                                            "description": "The weight with which this control point pulls no the curve.\nWhen not defined, the default will be 1.0."
+                                        }
+                                    },
+                                    "required": [
+                                        "x",
+                                        "y",
+                                        "weight"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "degree",
+                            "knotVector",
+                            "controlPoints"
+                        ]
                     }
                 },
                 "required": [
@@ -164,7 +241,7 @@
                 },
                 "localizationScore": {
                     "type": "number",
-                    "description": "Localization score for SLAM based vehicles, if the AGV can communicate it.",
+                    "description": "Describes the quality of the localization and therefore, can be used e. g. by SLAM-AGVs to describe how accurate the current position information is.\n0.0: position unknown\n1.0: position known\nOptional for vehicles that cannot estimate their localization score.\nOnly for logging and visualization purposes",
                     "minimum": 0.0,
                     "maximum": 1.0
                 },
@@ -197,58 +274,9 @@
                 }
             }
         },
-        "trajectory": {
-            "type": "object",
-            "description": "AGVs that plan their own path are to communicate their path via a trajectory object. The trajectory is to be communicated as a NURBS.",
-            "properties": {
-                "degree": {
-                    "type": "number",
-                    "description": "The degree of the NURBS."
-                },
-                "knotVector": {
-                    "type": "array",
-                    "description": "Sequence of parameter values that determine where and how the control points affect the NURBS curve. knotVector has size of number of control points + degree + 1",
-                    "items": {
-                        "type": "number",
-                        "maximum": 1.0,
-                        "minimum": 0.0
-                    }
-                },
-                "controlPoints": {
-                    "type": "array",
-                    "description": "List of JSON controlPoint objects defining the control points of the NURBS. This includes the start and end point.",
-                    "items": {
-                        "type": "object",
-                        "title": "controlPoint",
-                        "properties": {
-                            "x": {
-                                "type": "number"
-                            },
-                            "y": {
-                                "type": "number"
-                            },
-                            "weight": {
-                                "type": "number",
-                                "description": "The weight with which this control point pulls no the curve.\nWhen not defined, the default will be 1.0."
-                            }
-                        },
-                        "required": [
-                            "x",
-                            "y",
-                            "weight"
-                        ]
-                    }
-                }
-            },
-            "required": [
-                "degree",
-                "knotVector",
-                "controlPoints"
-            ]
-        },
         "loads": {
             "type": "array",
-            "description": "Array for information about the loads that an AGV currently carries, if the AGV has any information about them.",
+            "description": "Array for information about the loads that an AGV currently carries, if the AGV has any information about them. This array is optional: if an AGV cannot reason about its load state, it shall not send this field. If an empty field is sent, MC is to assume that the AGV can reason about its load state and that the AGV currently does not carry a load.",
             "items": {
                 "type": "object",
                 "$id": "#/state/load",
@@ -257,14 +285,14 @@
                 "properties": {
                     "loadId": {
                         "type": "string",
-                        "description": "Unique identification number of the load (e. g. barcode or RFID)\nEmpty field if the AGV can identify the load but didn’t identify the load yet.\nOptional if the AGV has cannot identify the load."
+                        "description": "Unique identification number of the load (e. g. barcode or RFID)\nEmpty field if the AGV can identify the load but didnâ€™t identify the load yet.\nOptional if the AGV has cannot identify the load."
                     },
                     "loadType": {
                         "type": "string"
                     },
                     "loadPosition": {
                         "type": "string",
-                        "description": "Indicates which load handling/carrying unit of the AGV is used, e. g. in case the AGV has multiple spots/positions to carry loads.\nFor example: “front”, “back”, “positionC1”, etc.\nOptional for vehicles with only one loadPosition."
+                        "description": "Indicates which load handling/carrying unit of the AGV is used, e. g. in case the AGV has multiple spots/positions to carry loads.\nFor example: â€œfrontâ€, â€œbackâ€, â€œpositionC1â€, etc.\nOptional for vehicles with only one loadPosition."
                     },
                     "boundingBoxReference": {
                         "type": "object",
@@ -278,6 +306,9 @@
                             },
                             "z": {
                                 "type": "number"
+                            },
+                            "theta": {
+                                "type": "number"
                             }
                         },
                         "required": [
@@ -289,7 +320,7 @@
                     "loadDimensions": {
                         "type": "object",
                         "title": "loadDimensions",
-                        "description": "Dimensions of the load’s bounding box in meters. ",
+                        "description": "Dimensions of the loadâ€™s bounding box in meters. ",
                         "properties": {
                             "length": {
                                 "type": "number",
@@ -314,22 +345,12 @@
                         "description": "Weight of load in kg"
                     }
                 },
-                "required": [
-                    "loadId"
-                ]
+                "required": []
             }
-        },
-        "driving": {
-            "type": "boolean",
-            "description": "True indicates that the AGV drives and/or rotates. Other movements of the AGV (e.g. lift movements) are not included."
-        },
-        "distanceSinceLastNode": {
-            "type": "number",
-            "description": "Distance in meters since last passed node."
         },
         "actionStates": {
             "type": "array",
-            "description": "Contains a list of the current actions and the actions which are yet to be finished. This may include actions from previous nodes that are still in progress\nWhen an action is completed, an updated state message is published with actionStatus set to finished and if applicable with the corresponding resultDescription. Then the action is omitted from the array.",
+            "description": "Contains a list of the current actions and the actions which are yet to be finished. This may include actions from previous nodes that are still in progress\nWhen an action is completed, an updated state message is published with actionStatus set to finished and if applicable with the corresponding resultDescription. The actionStates are kept until a new order is received.",
             "items": {
                 "type": "object",
                 "title": "actionState",
@@ -337,11 +358,14 @@
                 "properties": {
                     "actionId": {
                         "type": "string",
-                        "description": "unique Action Id with postfix if attached to node or edge.",
+                        "description": "Unique actionId",
                         "examples": [
-                            "blink_1",
-                            "blink"
+                            "blink_123jdaimoim234"
                         ]
+                    },
+                    "actionType": {
+                        "type": "string",
+                        "description": "actionType of the action.\nOptional: Only for informational or visualization purposes. Order knows the type."
                     },
                     "actionDescription": {
                         "type": "string",
@@ -349,7 +373,7 @@
                     },
                     "actionStatus": {
                         "type": "string",
-                        "description": "Status of the action.",
+                        "description": "waiting: waiting for trigger\nfailed: action could not be performed.",
                         "enum": [
                             "waiting",
                             "initializing",
@@ -400,21 +424,10 @@
                 "charging"
             ]
         },
-        "operatingMode": {
-            "type": "string",
-            "description": "Current operating mode of the AGV.",
-            "enum": [
-                "automatic",
-                "semi-automatic",
-                "manual",
-                "service",
-                "teachin"
-            ]
-        },
         "errors": {
             "type": "array",
             "title": "Errors",
-            "description": "Array of errors.",
+            "description": "Array of errors. Errors are kept until resolution.",
             "items": {
                 "type": "object",
                 "title": "Error",
@@ -440,8 +453,8 @@
                                 }
                             },
                             "required": [
-                                "referenceKey",
-                                "referenceValue"
+                                "key",
+                                "value"
                             ]
                         }
                     },
