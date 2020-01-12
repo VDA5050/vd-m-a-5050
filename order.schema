@@ -1,89 +1,122 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "order.schema",
+    "$id": "#/order",
     "title": "Order Message",
-    "description": "A message to communicate a new order from the Master to the AGV",
-    "subtopic": "/order",
-    "documentVersion": "0.806",
+    "description": "The message schema to communicate orders from master control to the AGV",
+    "documentVersion": "4.0.0",
     "type": "object",
     "properties": {
-        "sequenceID": {
+        "headerId": {
+            "title": "headerId",
             "type": "integer",
-            "description": "headerId of the message. The headerId is defined per topic and incremented by 1 with each sent (but not necessarily received) message. "
+            "description": "headerId of the message. The headerId is defined per topic and incremented by 1 with each sent (but not necessarily received) message."
         },
-        "timeStamp": {
-            "title": "Timestamp",
-            "description": "Timestamp in ISO8601 Format",
-            "type": "string"
+        "timestamp": {
+            "title": "timestamp",
+            "type": "string",
+            "description": "Timestamp in ISO8601 format.",
+            "examples": [
+                "1991-03-11T11:40:03.12Z"
+            ]
         },
         "version": {
-            "title": "Protocol Version",
-            "description": "Major, Minor, Patch Version of the Protocol",
+            "title": "Version",
+            "type": "string",
+            "description": "Version of the protocol [Major].[Minor].[Patch]",
+            "examples": [
+                "1.3.2"
+            ]
+        },
+        "manufacturer": {
+            "type": "string",
+            "description": "Manufacturer of the AGV"
+        },
+        "serialNumber": {
+            "type": "string",
+            "description": "Serial number of the AGV."
+        },
+        "orderId": {
+            "title": "orderId",
+            "description": "Unique order Identification.",
             "type": "string"
         },
-        "orderID": {
-            "title": "Unique Order ID",
-            "type": "string"
+        "orderUpdateId": {
+            "title": "orderUpdateId",
+            "description": "orderUpdate identification. Is unique per orderId. If an order update is rejected, this field is to be passed in the rejection message.",
+            "type": "number"
+        },
+        "replace": {
+            "type": "boolean",
+            "title": "replace",
+            "description": "Indicates that previously released base nodes should be replaced by the base of an updated order. \n If this is not possible, the AGV returns an error code (see errors in topic state). \n Optional: \n Should only be sent if the base is changed by the order."
         },
         "nodes": {
             "title": "List of Nodes",
             "description": "This list holds the base and the horizon nodes of the order graph.",
+            "$id": "#/order/nodes",
             "type": "array",
             "items": {
                 "type": "object",
                 "title": "node",
                 "required": [
-                    "nodeID",
+                    "nodeId",
+                    "sequenceId",
                     "released",
-                    "position",
-                    "actions"
+                    "nodePosition",
+                    "allowedDeviation"
                 ],
                 "properties": {
                     "nodeId": {
-                        "title": "nodeID",
+                        "title": "nodeId",
                         "type": "string",
-                        "description": "Unique node identification number.",
+                        "description": "Unique node identification",
                         "examples": [
                             "pumpenhaus_1",
                             "MONTAGE"
                         ]
+                    },
+                    "sequenceId": {
+                        "title": "sequenceId",
+                        "type": "number",
+                        "description": "Id to track the sequence of nodes and edges in an order and to simplify order updates.\nThe main purpose is to distinguish between a node which is passed more than once within one orderId. The variable sequenceId can run across all nodes and edges of the same order and is reset when a new orderId is issued."
                     },
                     "nodeDescription": {
                         "title": "nodeDescription",
                         "type": "string",
                         "description": "Verbose Node Description."
                     },
-                    "replaceBase": {
-                        "title": "replaceBase",
+                    "released": {
                         "type": "boolean",
-                        "description": "Indicates that the node replaces a previously sent base node. If that is not possible, the AGV is to return an error code."
+                        "title": "released",
+                        "description": "If true, the edge is part of the base plan. If false, the edge is part of the horizon plan."
                     },
-                    "position": {
-                        "title": "Position",
-                        "description": "Position Object for an AGV or a Node.",
+                    "nodePosition": {
+                        "title": "nodePosition",
+                        "description": "Defines the position on a map in world coordinates. Each floor has its own map. Precision is up to the specific implementation",
                         "type": "object",
+                        "$id": "#/order/nodes/nodePosition",
                         "required": [
                             "x",
                             "y",
-                            "theta",
-                            "mapID"
+                            "mapId"
                         ],
                         "properties": {
                             "x": {
-                                "title": "X",
+                                "title": "x",
                                 "type": "number"
                             },
                             "y": {
-                                "title": "Y",
+                                "title": "y",
                                 "type": "number"
                             },
                             "theta": {
                                 "title": "Theta",
+                                "description": "Value should be within -Pi, Pi range. Optional: Vehicle can plan the path by itself.",
                                 "type": "number"
                             },
-                            "mapID": {
-                                "title": "mapID",
-                                "description": "Unique identification of the map in which the position is referenced",
+                            "mapId": {
+                                "title": "mapId",
+                                "description": "Unique identification of the map in which the position is referenced.\nEach map has the same origin of coordinates. When an AGV uses an elevator, e. g. leading from a departure floor to a target floor, it will disappear off the map of the departure floor and spawn in the related lift node on the map of the target floor.",
                                 "type": "string"
                             },
                             "mapDescription": {
@@ -93,17 +126,123 @@
                             }
                         }
                     },
-                    "isExact": {
-                        "title": "isExact",
-                        "type": "boolean",
-                        "description": "If true, node has to be traversed exactly and cannot be skipped."
+                    "allowedDeviation": {
+                        "title": "allowedDeviation",
+                        "type": "number",
+                        "description": "Indicates how exact an AGV has to drive over a node in order for it to count as traversed. \nIf = 0: no deviation is allowed (no deviation means within the normal tolerance of the AGV manufacturer).\nIf > 0: allowed deviation-radius in meters. If the AGV passes a node within the deviation-radius, the node is considered to have been traversed."
                     },
                     "actions": {
-                        "title": "actions",
-                        "description": "Array of Unique action IDs which must be found in the action array",
+                        "title": "Actions",
+                        "$id": "#actions",
+                        "description": "Array of action objects with detailed information.",
                         "type": "array",
                         "items": {
-                            "type": "string"
+                            "type": "object",
+                            "$id": "#action",
+                            "title": "action",
+                            "description": "Action Object",
+                            "required": [
+                                "actionId",
+                                "actionName"
+                            ],
+                            "properties": {
+                                "actionName": {
+                                    "type": "string",
+                                    "title": "actionName",
+                                    "description": "Enum of actions as described in the first column of \"Actions and Parameters\"\nIdentifies the function of the action."
+                                },
+                                "actionId": {
+                                    "type": "number",
+                                    "title": "actionId",
+                                    "description": "ID to distinguish between multiple actions with the same name on the same node."
+                                },
+                                "actionDescription": {
+                                    "type": "string",
+                                    "title": "Additional Information on the action"
+                                },
+                                "blockingType": {
+                                    "type": "string",
+                                    "title": "blockingType",
+                                    "description": "Regulates if the action is allowed to be executed during movement and/or parallel to other actions.\nnone: action can happen in parallel with others, including movement.\nsoft: action can happen simultaneously with others, but not while moving.\nhard: no other actions can be performed while this action is running.",
+                                    "enum": [
+                                        "none",
+                                        "soft",
+                                        "hard"
+                                    ]
+                                },
+                                "triggerPointType": {
+                                    "type": "string",
+                                    "title": "triggerPointType",
+                                    "description": "Type of trigger can be time or distance. Refers to the time/distance after passing a node indicated in triggerPointValue.\nOptional:\nCan be omitted if not needed.\nCannot be used for edges.\nCannot be used for instantActions.",
+                                    "enum": [
+                                        "time",
+                                        "distance"
+                                    ]
+                                },
+                                "triggerPointValue": {
+                                    "type": "number",
+                                    "title": "triggerPointValue",
+                                    "description": "Specifies the time in seconds or distance in emters after passing a node until the action is triggered. Default is 0. Negative values describe positions before the node.\nOptional:\nCan be omitted if not needed.\nCannot be used for edges.\nCannot be used for instantActions."
+                                },
+                                "durationType": {
+                                    "type": "string",
+                                    "title": "durationType",
+                                    "description": "Actions can last for a certain time, or distance, or can be repeated a certain number of times.\nOptional:\nCannot be used for edges.",
+                                    "enum": [
+                                        "time",
+                                        "distance",
+                                        "count"
+                                    ]
+                                },
+                                "durationValue": {
+                                    "type": "number",
+                                    "title": "durationValue",
+                                    "description": "Specifies the time in seconds or distance in meters that the action has to continue. For count: Specifies how many times the action has to be repeated."
+                                },
+                                "actionParameters": {
+                                    "type": "array",
+                                    "description": "Array of actionParameter-objects for the indicated action e. g. deviceId, loadId, external Triggers.",
+                                    "items": {
+                                        "title": "actionParameter",
+                                        "type": "object",
+                                        "required": [
+                                            "key",
+                                            "value"
+                                        ],
+                                        "properties": {
+                                            "key": {
+                                                "type": "string",
+                                                "description": "The key of the action parameter.",
+                                                "examples": [
+                                                    "duration",
+                                                    "direction",
+                                                    "signal"
+                                                ]
+                                            },
+                                            "value": {
+                                                "type": [
+                                                    "array",
+                                                    "boolean",
+                                                    "number",
+                                                    "string"
+                                                ],
+                                                "description": "The value of the action parameter",
+                                                "examples": [
+                                                    103.2,
+                                                    "left",
+                                                    true,
+                                                    [
+                                                        "arrays",
+                                                        "are",
+                                                        "also",
+                                                        "valid"
+                                                    ]
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -117,16 +256,23 @@
                 "type": "object",
                 "title": "edge",
                 "required": [
-                    "edgeID",
+                    "edgeId",
+                    "sequenceId",
                     "released",
-                    "startNode",
-                    "endNode"
+                    "startNodeId",
+                    "endNodeId",
+                    "actions"
                 ],
                 "properties": {
-                    "edgeID": {
+                    "edgeId": {
                         "type": "string",
-                        "title": "edgeID",
+                        "title": "edgeId",
                         "description": "Unique edge identification"
+                    },
+                    "sequenceId": {
+                        "type": "number",
+                        "title": "sequenceId",
+                        "description": "Id to track the sequence of nodes and edges in an order and to simplify order updates. The variable sequenceId runs across all nodes and edges of the same order and is reset when a new orderId is issued."
                     },
                     "edgeDescription": {
                         "type": "string",
@@ -138,25 +284,20 @@
                         "title": "released",
                         "description": "If true, the edge is part of the base plan. If false, the edge is part of the horizon plan."
                     },
-                    "replaceBase": {
-                        "type": "boolean",
-                        "title": "replaceBase",
-                        "description": "If true, this edge replaces a previously sent base edge. If that is not possible, the AGV is to return an error code."
-                    },
-                    "startNode": {
+                    "startNodeId": {
                         "type": "string",
-                        "title": "startNode",
-                        "description": "The nodeID of the start node."
+                        "title": "startNodeId",
+                        "description": "The nodeId of the start node."
                     },
-                    "endNode": {
+                    "endNodeId": {
                         "type": "string",
-                        "title": "endNode",
-                        "description": "The nodeID of the end node."
+                        "title": "endNodeId",
+                        "description": "The nodeId of the end node."
                     },
                     "maxSpeed": {
                         "type": "number",
                         "title": "maxSpeed",
-                        "description": "permitted maximum speed of the agv on the edge. Speed is defined by the fastest point of the vehicle."
+                        "description": "permitted maximum speed of the agv on the edge in m/s. Speed is defined by the fastest point of the vehicle."
                     },
                     "maxHeight": {
                         "type": "number",
@@ -166,17 +307,17 @@
                     "minHeight": {
                         "type": "number",
                         "title": "minHeight",
-                        "description": "Permitted minimal height of the edge measured at the bottom of the load."
+                        "description": "Permitted minimal height of the edge measured at the bottom of the load. In meters."
                     },
                     "orientation": {
                         "type": "number",
                         "title": "orientation",
-                        "description": "Orientation ont he edge (for holonomic vehicles with more than one drive direction)"
+                        "description": "Orientation relative to the tangential direction of the edge (for holonomic vehicles with more than one driving direction).\nExample: orientation Pi/2 rad will lead to a rotation of 90 degrees."
                     },
                     "direction": {
-                        "type": "number",
+                        "type": "string",
                         "title": "direction",
-                        "description": "Sets direction at junctions for line-guided vehicles, to be defined initially (vehicle-individual)."
+                        "description": "Sets direction at junctions for line-guided vehicles, to be defined initially (vehicle-individual). Can be descriptive (left, right, middle) or a frequency."
                     },
                     "rotationAllowed": {
                         "type": "boolean",
@@ -186,110 +327,174 @@
                     "maxRotationSpeed": {
                         "type": "number",
                         "title": "maxRotationSpeed",
-                        "description": "Maximum rotation speed"
+                        "description": "Maximum rotation speed in rad/s"
                     },
                     "distance": {
                         "type": "number",
                         "title": "distance",
-                        "description": "Distance of the path from startNode to endNode. This value is used by line-guided AGVs to decrease their speed before reaching a stop position."
+                        "description": "Distance of the path from startNode to endNode in meters. This value is used by line-guided AGVs to decrease their speed before reaching a stop position."
                     },
                     "trajectory": {
-                        "type": "array",
-                        "title": "trajectory",
-                        "description": "Object that holds points for the calculation of a NURB-Spline.",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "x": {
+                        "type": "object",
+                        "description": "Trajectory that an AGV has to follow on this edge. The trajectory is to be defined as a NURBS.",
+                        "properties": {
+                            "degree": {
+                                "type": "number",
+                                "description": "The degree of the NURBS."
+                            },
+                            "knotVector": {
+                                "type": "array",
+                                "description": "Sequence of parameter values that determine where and how the control points affect the NURBS curve. knotVector has size of number of control points + degree + 1",
+                                "items": {
                                     "type": "number",
-                                    "title": "x",
-                                    "description": "x coordinate of Anchor Point"
-                                },
-                                "y": {
-                                    "type": "number",
-                                    "title": "y",
-                                    "description": "y coordinate of anchor point"
+                                    "maximum": 1.0,
+                                    "minimum": 0.0
+                                }
+                            },
+                            "controlPoints": {
+                                "type": "array",
+                                "description": "List of JSON controlPoint objects defining the control points of the NURBS. This includes the start and end point.",
+                                "items": {
+                                    "type": "object",
+                                    "title": "controlPoint",
+                                    "properties": {
+                                        "x": {
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "type": "number"
+                                        },
+                                        "weight": {
+                                            "type": "number",
+                                            "description": "The weight with which this control point pulls no the curve.\nWhen not defined, the default will be 1.0."
+                                        }
+                                    },
+                                    "required": [
+                                        "x",
+                                        "y",
+                                        "weight"
+                                    ]
                                 }
                             }
-                        }
-                    },
-                    "actionList": {
-                        "type": "array",
-                        "title": "actionList",
-                        "description": "Array of ActionIDs to be performed on edge.",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "actions": {
-            "title": "Actions",
-            "description": "Array of action objects with detailed information.",
-            "type": "array",
-            "items": {
-                "type": "object",
-                "title": "Action Object",
-                "description": "Action Object",
-                "required": [
-                    "actionID"
-                ],
-                "properties": {
-                    "actionID": {
-                        "type": "string",
-                        "title": "actionID",
-                        "description": "Unique Action ID",
-                        "examples": [
-                            "lift_mo28s"
+                        },
+                        "required": [
+                            "degree",
+                            "knotVector",
+                            "controlPoints"
                         ]
                     },
-                    "actionDescription": {
-                        "type": "string",
-                        "title": "Additional Information on the action"
-                    },
-                    "blockingType": {
-                        "type": "string",
-                        "title": "blockingType",
-                        "description": "Regulates if the action is allowed to be executed during movement and/or parallel to other actions",
-                        "enum": [
-                            "noBlock",
-                            "softBlock",
-                            "hardBlock"
-                        ]
-                    },
-                    "triggerPointType": {
-                        "type": "string",
-                        "title": "triggerPointType",
-                        "description": "Type of the trigger. Can be time or distance. A negative distance executes the action before the node is reached.",
-                        "enum": [
-                            "time",
-                            "distance"
-                        ]
-                    },
-                    "triggerPointValue": {
-                        "type": "number",
-                        "title": "triggerPointValue",
-                        "description": "Specifies the time in seconds or distance in emters after passing a node until the action is triggered. Default is 0. Negative values describe positions before the node."
-                    },
-                    "durationType": {
-                        "type": "string",
-                        "title": "durationType",
-                        "description": "Actions can last for a certain time or distance",
-                        "enum": [
-                            "time",
-                            "distance"
-                        ]
-                    },
-                    "durationValue": {
-                        "type": "number",
-                        "title": "durationValue",
-                        "description": "Specifies the time in seconds or distance in meters that the action has to continue. Default is 0. Attention: Depending on the type and value, is is possible that an action can last beyond the following node."
-                    },
-                    "actionParameter": {
+                    "actions": {
+                        "title": "Actions",
+                        "$id": "#actions",
+                        "description": "Array of action objects with detailed information.",
                         "type": "array",
                         "items": {
-                            "type": "object"
+                            "type": "object",
+                            "$id": "#action",
+                            "title": "action",
+                            "description": "Action Object",
+                            "required": [
+                                "actionId",
+                                "actionName"
+                            ],
+                            "properties": {
+                                "actionName": {
+                                    "type": "string",
+                                    "title": "actionName",
+                                    "description": "Enum of actions as described in the first column of \"Actions and Parameters\"\nIdentifies the function of the action."
+                                },
+                                "actionId": {
+                                    "type": "number",
+                                    "title": "actionId",
+                                    "description": "ID to distinguish between multiple actions with the same name on the same node."
+                                },
+                                "actionDescription": {
+                                    "type": "string",
+                                    "title": "Additional Information on the action"
+                                },
+                                "blockingType": {
+                                    "type": "string",
+                                    "title": "blockingType",
+                                    "description": "Regulates if the action is allowed to be executed during movement and/or parallel to other actions.\nnone: action can happen in parallel with others, including movement.\nsoft: action can happen simultaneously with others, but not while moving.\nhard: no other actions can be performed while this action is running.",
+                                    "enum": [
+                                        "none",
+                                        "soft",
+                                        "hard"
+                                    ]
+                                },
+                                "triggerPointType": {
+                                    "type": "string",
+                                    "title": "triggerPointType",
+                                    "description": "Type of trigger can be time or distance. Refers to the time/distance after passing a node indicated in triggerPointValue.\nOptional:\nCan be omitted if not needed.\nCannot be used for edges.\nCannot be used for instantActions.",
+                                    "enum": [
+                                        "time",
+                                        "distance"
+                                    ]
+                                },
+                                "triggerPointValue": {
+                                    "type": "number",
+                                    "title": "triggerPointValue",
+                                    "description": "Specifies the time in seconds or distance in emters after passing a node until the action is triggered. Default is 0. Negative values describe positions before the node.\nOptional:\nCan be omitted if not needed.\nCannot be used for edges.\nCannot be used for instantActions."
+                                },
+                                "durationType": {
+                                    "type": "string",
+                                    "title": "durationType",
+                                    "description": "Actions can last for a certain time, or distance, or can be repeated a certain number of times.\nOptional:\nCannot be used for edges.",
+                                    "enum": [
+                                        "time",
+                                        "distance",
+                                        "count"
+                                    ]
+                                },
+                                "durationValue": {
+                                    "type": "number",
+                                    "title": "durationValue",
+                                    "description": "Specifies the time in seconds or distance in meters that the action has to continue. For count: Specifies how many times the action has to be repeated."
+                                },
+                                "actionParameters": {
+                                    "type": "array",
+                                    "description": "Array of actionParameter-objects for the indicated action e. g. deviceId, loadId, external Triggers.",
+                                    "items": {
+                                        "title": "actionParameter",
+                                        "type": "object",
+                                        "required": [
+                                            "key",
+                                            "value"
+                                        ],
+                                        "properties": {
+                                            "key": {
+                                                "type": "string",
+                                                "description": "The key of the action parameter.",
+                                                "examples": [
+                                                    "duration",
+                                                    "direction",
+                                                    "signal"
+                                                ]
+                                            },
+                                            "value": {
+                                                "type": [
+                                                    "array",
+                                                    "boolean",
+                                                    "number",
+                                                    "string"
+                                                ],
+                                                "description": "The value of the action parameter",
+                                                "examples": [
+                                                    103.2,
+                                                    "left",
+                                                    true,
+                                                    [
+                                                        "arrays",
+                                                        "are",
+                                                        "also",
+                                                        "valid"
+                                                    ]
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -297,10 +502,13 @@
         }
     },
     "required": [
-        "sequenceID",
+        "headerId",
         "timestamp",
         "version",
-        "orderID",
+        "manufacturer",
+        "serialNumber",
+        "orderId",
+        "orderUpdateId",
         "nodes",
         "edges"
     ]
