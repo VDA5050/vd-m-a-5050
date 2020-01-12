@@ -1,0 +1,258 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "systemState.json"   "title": "systemState",
+    "description": "all encompassing systemState of the AGV",
+    "subtopic": "/systemState",
+    "publisher": true,
+    "subscriber": false,
+    "type": "object",
+    "properties": {
+        "sequenceID": {
+            "type": "integer"
+        },
+        "timestamp": {
+            "type": "string"
+        },
+        "version": {
+            "type": "string"
+        },
+        "orderID": {
+            "type": "string",
+            "description": "Unique order identification. 'none' if idle."
+        },
+        "lastNode": {
+            "type": "string",
+            "description": "nodeID of last reached node or current node."
+        },
+        "nodeStates": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "title": "nodeState",
+                "properties": {
+                    "nodeID": {
+                        "type": "string",
+                        "description": "Unique node identification"
+                    },
+                    "nodeDescription": {
+                        "type": "string",
+                        "description": "Verbose node description"
+                    },
+                    "position": {
+                        "type": "object",
+                        "properties": {
+                            "x": {
+                                "type": "number"
+                            },
+                            "y": {
+                                "type": "number"
+                            },
+                            "theta": {
+                                "type": "number"
+                            },
+                            "mapID": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "released": {
+                        "type": "boolean",
+                        "description": "Whether the node is part of the base or the horizon"
+                    }
+                }
+            }
+        },
+        "edgeStates": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "title": "nodeState",
+                "properties": {
+                    "edgeID": {
+                        "type": "string",
+                        "description": "Unique edge identification"
+                    },
+                    "edgeDescription": {
+                        "type": "string",
+                        "description": "Verbose Edge description"
+                    },
+                    "released": {
+                        "type": "boolean",
+                        "description": "Wether edge is part of base or horizon"
+                    }
+                }
+            }
+        },
+        "position": {
+            "type": "object",
+            "description": "The AGVs position",
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                },
+                "theta": {
+                    "type": "number"
+                },
+                "mapID": {
+                    "type": "string"
+                }
+            }
+        },
+        "velocity": {
+            "type": "object",
+            "description": "Velocity in vehicle coordinates",
+            "properties": {
+                "vx": {
+                    "type": "number"
+                },
+                "vy": {
+                    "type": "number"
+                },
+                "omega": {
+                    "type": "number"
+                }
+            }
+        },
+        "load": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "title": "load",
+                "properties": {
+                    "loadStationType": {
+                        "type": "number",
+                        "description": "Type of load station"
+                    },
+                    "loadID": {
+                        "type": "number",
+                        "description": "Unique identification number of the load"
+                    },
+                    "loadType": {
+                        "type": "number"
+                    },
+                    "weight": {
+                        "type": "number",
+                        "description": "Weight of load in kg"
+                    },
+                    "length": {
+                        "type": "number",
+                        "description": "Absolute length of the loads bounding box in meter."
+                    },
+                    "width": {
+                        "type": "number",
+                        "description": "Absolute width of the loads bounding box in meter."
+                    },
+                    "height": {
+                        "type": "number",
+                        "description": "Absolute height of the loads bounding box in meter."
+                    }
+                }
+            }
+        },
+        "currentActions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "title": "currentAction",
+                "properties": {
+                    "actionID": {
+                        "type": "string",
+                        "description": "unique Action ID"
+                    },
+                    "actionDescription": {
+                        "type": "string",
+                        "description": "Additional information on the action."
+                    },
+                    "actionStatus": {
+                        "type": "string",
+                        "description": "error, waiting, initializing, running, finished"
+                    },
+                    "resultDescription": {
+                        "type": "string",
+                        "description": "Description of the result, e.g. the result of a rfid-read."
+                    },
+                    "errorCode": {
+                        "type": "number",
+                        "description": "Unique error code."
+                    }
+                }
+            }
+        },
+        "batteryCharge": {
+            "type": "number",
+            "description": "State of charge in percent."
+        },
+        "batteryVoltage": {
+            "type": "number",
+            "description": "Battery voltage"
+        },
+        "batteryHealth": {
+            "type": "number",
+            "description": "State of health in percent."
+        },
+        "charging": {
+            "type": "boolean",
+            "description": "If true: Charging in progress."
+        },
+        "reach": {
+            "type": "number",
+            "description": "estimated reach with actual State of Charge"
+        },
+        "operatingMode": {
+            "type": "string",
+            "enum": [
+                "automatic",
+                "semi-automatic",
+                "manual",
+                "service",
+                "teachin"
+            ],
+            "description": "automatic, semi-automatic, manual, service, teachin"
+        },
+        "errors": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "errorID": {
+                        "type": "string"
+                    },
+                    "errorDescription": {
+                        "type": "string"
+                    },
+                    "errorLevel": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "eStop": {
+            "type": "string",
+            "description": "autoAck, manual, remote, none"
+        },
+        "fieldViolation": {
+            "type": "boolean",
+            "description": "Protective field violation"
+        }
+    },
+    "required": [
+        "sequenceID",
+        "timestamp",
+        "version",
+        "orderID",
+        "lastNode",
+        "nodeStates",
+        "edgeStates",
+        "postition",
+        "currentActions",
+        "batteryCharge",
+        "charging",
+        "operatingMode",
+        "errors",
+        "eStop",
+        "fieldViolation"
+    ]
+}
