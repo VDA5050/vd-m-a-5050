@@ -1,0 +1,307 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "order.schema",
+    "title": "Order Message",
+    "description": "A message to communicate a new order from the Master to the AGV",
+    "subtopic": "/order",
+    "documentVersion": "0.806",
+    "type": "object",
+    "properties": {
+        "sequenceID": {
+            "type": "integer",
+            "description": "headerId of the message. The headerId is defined per topic and incremented by 1 with each sent (but not necessarily received) message. "
+        },
+        "timeStamp": {
+            "title": "Timestamp",
+            "description": "Timestamp in ISO8601 Format",
+            "type": "string"
+        },
+        "version": {
+            "title": "Protocol Version",
+            "description": "Major, Minor, Patch Version of the Protocol",
+            "type": "string"
+        },
+        "orderID": {
+            "title": "Unique Order ID",
+            "type": "string"
+        },
+        "nodes": {
+            "title": "List of Nodes",
+            "description": "This list holds the base and the horizon nodes of the order graph.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "title": "node",
+                "required": [
+                    "nodeID",
+                    "released",
+                    "position",
+                    "actions"
+                ],
+                "properties": {
+                    "nodeId": {
+                        "title": "nodeID",
+                        "type": "string",
+                        "description": "Unique node identification number.",
+                        "examples": [
+                            "pumpenhaus_1",
+                            "MONTAGE"
+                        ]
+                    },
+                    "nodeDescription": {
+                        "title": "nodeDescription",
+                        "type": "string",
+                        "description": "Verbose Node Description."
+                    },
+                    "replaceBase": {
+                        "title": "replaceBase",
+                        "type": "boolean",
+                        "description": "Indicates that the node replaces a previously sent base node. If that is not possible, the AGV is to return an error code."
+                    },
+                    "position": {
+                        "title": "Position",
+                        "description": "Position Object for an AGV or a Node.",
+                        "type": "object",
+                        "required": [
+                            "x",
+                            "y",
+                            "theta",
+                            "mapID"
+                        ],
+                        "properties": {
+                            "x": {
+                                "title": "X",
+                                "type": "number"
+                            },
+                            "y": {
+                                "title": "Y",
+                                "type": "number"
+                            },
+                            "theta": {
+                                "title": "Theta",
+                                "type": "number"
+                            },
+                            "mapID": {
+                                "title": "mapID",
+                                "description": "Unique identification of the map in which the position is referenced",
+                                "type": "string"
+                            },
+                            "mapDescription": {
+                                "title": "mapDescription",
+                                "description": "Verbose description of the Map",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "isExact": {
+                        "title": "isExact",
+                        "type": "boolean",
+                        "description": "If true, node has to be traversed exactly and cannot be skipped."
+                    },
+                    "actions": {
+                        "title": "actions",
+                        "description": "Array of Unique action IDs which must be found in the action array",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "edges": {
+            "type": "array",
+            "title": "edges",
+            "description": "Base and Horizon Edges of the Order Graph.",
+            "items": {
+                "type": "object",
+                "title": "edge",
+                "required": [
+                    "edgeID",
+                    "released",
+                    "startNode",
+                    "endNode"
+                ],
+                "properties": {
+                    "edgeID": {
+                        "type": "string",
+                        "title": "edgeID",
+                        "description": "Unique edge identification"
+                    },
+                    "edgeDescription": {
+                        "type": "string",
+                        "title": "edgeDescription",
+                        "description": "Verbose description of the edge."
+                    },
+                    "released": {
+                        "type": "boolean",
+                        "title": "released",
+                        "description": "If true, the edge is part of the base plan. If false, the edge is part of the horizon plan."
+                    },
+                    "replaceBase": {
+                        "type": "boolean",
+                        "title": "replaceBase",
+                        "description": "If true, this edge replaces a previously sent base edge. If that is not possible, the AGV is to return an error code."
+                    },
+                    "startNode": {
+                        "type": "string",
+                        "title": "startNode",
+                        "description": "The nodeID of the start node."
+                    },
+                    "endNode": {
+                        "type": "string",
+                        "title": "endNode",
+                        "description": "The nodeID of the end node."
+                    },
+                    "maxSpeed": {
+                        "type": "number",
+                        "title": "maxSpeed",
+                        "description": "permitted maximum speed of the agv on the edge. Speed is defined by the fastest point of the vehicle."
+                    },
+                    "maxHeight": {
+                        "type": "number",
+                        "title": "maxHeight",
+                        "description": "Permitted maximum height of the vehicle, including the load, on edge. In meters."
+                    },
+                    "minHeight": {
+                        "type": "number",
+                        "title": "minHeight",
+                        "description": "Permitted minimal height of the edge measured at the bottom of the load."
+                    },
+                    "orientation": {
+                        "type": "number",
+                        "title": "orientation",
+                        "description": "Orientation ont he edge (for holonomic vehicles with more than one drive direction)"
+                    },
+                    "direction": {
+                        "type": "number",
+                        "title": "direction",
+                        "description": "Sets direction at junctions for line-guided vehicles, to be defined initially (vehicle-individual)."
+                    },
+                    "rotationAllowed": {
+                        "type": "boolean",
+                        "title": "rotationAllowed",
+                        "description": "If true, rotation is allowed on the edge."
+                    },
+                    "maxRotationSpeed": {
+                        "type": "number",
+                        "title": "maxRotationSpeed",
+                        "description": "Maximum rotation speed"
+                    },
+                    "distance": {
+                        "type": "number",
+                        "title": "distance",
+                        "description": "Distance of the path from startNode to endNode. This value is used by line-guided AGVs to decrease their speed before reaching a stop position."
+                    },
+                    "trajectory": {
+                        "type": "array",
+                        "title": "trajectory",
+                        "description": "Object that holds points for the calculation of a NURB-Spline.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "x": {
+                                    "type": "number",
+                                    "title": "x",
+                                    "description": "x coordinate of Anchor Point"
+                                },
+                                "y": {
+                                    "type": "number",
+                                    "title": "y",
+                                    "description": "y coordinate of anchor point"
+                                }
+                            }
+                        }
+                    },
+                    "actionList": {
+                        "type": "array",
+                        "title": "actionList",
+                        "description": "Array of ActionIDs to be performed on edge.",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "actions": {
+            "title": "Actions",
+            "description": "Array of action objects with detailed information.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "title": "Action Object",
+                "description": "Action Object",
+                "required": [
+                    "actionID"
+                ],
+                "properties": {
+                    "actionID": {
+                        "type": "string",
+                        "title": "actionID",
+                        "description": "Unique Action ID",
+                        "examples": [
+                            "lift_mo28s"
+                        ]
+                    },
+                    "actionDescription": {
+                        "type": "string",
+                        "title": "Additional Information on the action"
+                    },
+                    "blockingType": {
+                        "type": "string",
+                        "title": "blockingType",
+                        "description": "Regulates if the action is allowed to be executed during movement and/or parallel to other actions",
+                        "enum": [
+                            "noBlock",
+                            "softBlock",
+                            "hardBlock"
+                        ]
+                    },
+                    "triggerPointType": {
+                        "type": "string",
+                        "title": "triggerPointType",
+                        "description": "Type of the trigger. Can be time or distance. A negative distance executes the action before the node is reached.",
+                        "enum": [
+                            "time",
+                            "distance"
+                        ]
+                    },
+                    "triggerPointValue": {
+                        "type": "number",
+                        "title": "triggerPointValue",
+                        "description": "Specifies the time in seconds or distance in emters after passing a node until the action is triggered. Default is 0. Negative values describe positions before the node."
+                    },
+                    "durationType": {
+                        "type": "string",
+                        "title": "durationType",
+                        "description": "Actions can last for a certain time or distance",
+                        "enum": [
+                            "time",
+                            "distance"
+                        ]
+                    },
+                    "durationValue": {
+                        "type": "number",
+                        "title": "durationValue",
+                        "description": "Specifies the time in seconds or distance in meters that the action has to continue. Default is 0. Attention: Depending on the type and value, is is possible that an action can last beyond the following node."
+                    },
+                    "actionParameter": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "required": [
+        "sequenceID",
+        "timestamp",
+        "version",
+        "orderID",
+        "nodes",
+        "edges"
+    ]
+}
