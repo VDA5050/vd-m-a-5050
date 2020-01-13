@@ -2,7 +2,8 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "#/order",
     "title": "Order Message",
-    "description": "The message schema to communicate orders from master control to the AGV",
+    "description": "The message schema to communicate orders from master control to the AGV.\nDocument Version: 4.0.0",
+    "subtopic": "/order",
     "documentVersion": "4.0.0",
     "type": "object",
     "properties": {
@@ -45,10 +46,10 @@
             "description": "orderUpdate identification. Is unique per orderId. If an order update is rejected, this field is to be passed in the rejection message.",
             "type": "number"
         },
-        "replace": {
-            "type": "boolean",
-            "title": "replace",
-            "description": "Indicates that previously released base nodes should be replaced by the base of an updated order. \n If this is not possible, the AGV returns an error code (see errors in topic state). \n Optional: \n Should only be sent if the base is changed by the order."
+        "zoneSetId": {
+            "title": "zoneSetId",
+            "description": "Unique identifier of the zone set that the AGV has to use for navigation or that was used by MC for planning.\nOptional: Some MC systems do not use zones. Some AGVs do not understand zones. Do not add to message if no zones are used.",
+            "type": "string"
         },
         "nodes": {
             "title": "List of Nodes",
@@ -63,7 +64,8 @@
                     "sequenceId",
                     "released",
                     "nodePosition",
-                    "allowedDeviation"
+                    "allowedDeviation",
+                    "actions"
                 ],
                 "properties": {
                     "nodeId": {
@@ -111,8 +113,10 @@
                             },
                             "theta": {
                                 "title": "Theta",
-                                "description": "Value should be within -Pi, Pi range. Optional: Vehicle can plan the path by itself.",
-                                "type": "number"
+                                "description": "Orientation of the AGV on the node.\nOptional: vehicle can plan the path by itself.\nIf defined, the AGV has to assume the theta angle on this node.\nIf previous edge disallows rotation, the AGV is to rotate on the node.\nIf following edge has a differing orientation defined but disallows rotation, the AGV is to rotate on the node to the edges desired rotation before entering the edge.",
+                                "type": "number",
+                                "minimum": -3.14159265359,
+                                "maximum": 3.14159265359
                             },
                             "mapId": {
                                 "title": "mapId",
@@ -129,18 +133,18 @@
                     "allowedDeviation": {
                         "title": "allowedDeviation",
                         "type": "number",
-                        "description": "Indicates how exact an AGV has to drive over a node in order for it to count as traversed. \nIf = 0: no deviation is allowed (no deviation means within the normal tolerance of the AGV manufacturer).\nIf > 0: allowed deviation-radius in meters. If the AGV passes a node within the deviation-radius, the node is considered to have been traversed."
+                        "description": "Indicates how exact an AGV has to drive over a node in order for it to count as traversed.\nIf = 0: no deviation is allowed (no deviation means within the normal tolerance of the AGV manufacturer).\nIf > 0: allowed deviation-radius in meters. If the AGV passes a node within the deviation-radius, the node is considered to have been traversed."
                     },
                     "actions": {
-                        "title": "Actions",
+                        "title": "actions",
                         "$id": "#actions",
-                        "description": "Array of action objects with detailed information.",
+                        "description": "Array of actions that are to be executed on the node. Their sequence in the list governs their sequence of execution.",
                         "type": "array",
                         "items": {
                             "type": "object",
                             "$id": "#action",
-                            "title": "action",
-                            "description": "Action Object",
+                            "title": "nodeAction",
+                            "description": "nodeAction",
                             "required": [
                                 "actionId",
                                 "actionType"
@@ -152,9 +156,9 @@
                                     "description": "Enum of actions as described in the first column of \"Actions and Parameters\"\nIdentifies the function of the action."
                                 },
                                 "actionId": {
-                                    "type": "number",
+                                    "type": "string",
                                     "title": "actionId",
-                                    "description": "ID to distinguish between multiple actions with the same name on the same node."
+                                    "description": "ID to distinguish between multiple actions with the same type on the same node."
                                 },
                                 "actionDescription": {
                                     "type": "string",
@@ -283,12 +287,20 @@
                     "orientation": {
                         "type": "number",
                         "title": "orientation",
-                        "description": "Orientation relative to the tangential direction of the edge (for holonomic vehicles with more than one driving direction).\nExample: orientation Pi/2 rad will lead to a rotation of 90 degrees."
+                        "description": "Orientation of the AGV on the edge relative to the tangential direction of the edge (for holonomic vehicles with more than one driving direction).\nExample: orientation Pi/2 rad will lead to a rotation of 90 degrees.\nIf vehicle starts in different orientation, rotate the vehicle on the edge to the desired orientation IF rotationAllowed is set to true.\nIf rotationAllowed is false, rotate before entering the edge.\nIf that is not possible, reject the order.\nIf a trajectory with orientation is defined, follow the trajectories orientation. If a trajectory without orientation and the orientation field here is defined, apply the orientation to the tangent of the trajectory.",
+                        "minimum": -3.14159265359,
+                        "maximum": 3.14159265359
                     },
                     "direction": {
                         "type": "string",
                         "title": "direction",
-                        "description": "Sets direction at junctions for line-guided vehicles, to be defined initially (vehicle-individual). Can be descriptive (left, right, middle) or a frequency."
+                        "description": "Sets direction at junctions for line-guided vehicles, to be defined initially (vehicle-individual). Can be descriptive (left, right, middle) or a frequency.",
+                        "examples": [
+                            "left",
+                            "right",
+                            "straight",
+                            "433MHz"
+                        ]
                     },
                     "rotationAllowed": {
                         "type": "boolean",
@@ -318,8 +330,8 @@
                                 "description": "Sequence of parameter values that determine where and how the control points affect the NURBS curve. knotVector has size of number of control points + degree + 1",
                                 "items": {
                                     "type": "number",
-                                    "maximum": 1.0,
-                                    "minimum": 0.0
+                                    "maximum": 1,
+                                    "minimum": 0
                                 }
                             },
                             "controlPoints": {
@@ -338,6 +350,12 @@
                                         "weight": {
                                             "type": "number",
                                             "description": "The weight with which this control point pulls no the curve.\nWhen not defined, the default will be 1.0."
+                                        },
+                                        "orientation": {
+                                            "type": "number",
+                                            "description": "Orientation of the AGV on this position of the curve. The orientation is in world coordinates.\nWhen not defined the orientation of the AGV will be tangential to the curve.",
+                                            "minimum": -3.14159265359,
+                                            "maximum": 3.14159265359
                                         }
                                     },
                                     "required": [
@@ -361,9 +379,9 @@
                         "type": "array",
                         "items": {
                             "type": "object",
-                            "$id": "#action",
-                            "title": "action",
-                            "description": "Action Object",
+                            "$id": "#edgeAction",
+                            "title": "edgeAction",
+                            "description": "edgeAction",
                             "required": [
                                 "actionId",
                                 "actionType"
