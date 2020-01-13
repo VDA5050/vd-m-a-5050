@@ -383,45 +383,6 @@
                                     "type": "string",
                                     "title": "Additional Information on the action"
                                 },
-                                "blockingType": {
-                                    "type": "string",
-                                    "title": "blockingType",
-                                    "description": "Regulates if the action is allowed to be executed during movement and/or parallel to other actions.\nnone: action can happen in parallel with others, including movement.\nsoft: action can happen simultaneously with others, but not while moving.\nhard: no other actions can be performed while this action is running.",
-                                    "enum": [
-                                        "none",
-                                        "soft",
-                                        "hard"
-                                    ]
-                                },
-                                "triggerPointType": {
-                                    "type": "string",
-                                    "title": "triggerPointType",
-                                    "description": "Type of trigger can be time or distance. Refers to the time/distance after passing a node indicated in triggerPointValue.\nOptional:\nCan be omitted if not needed.\nCannot be used for edges.\nCannot be used for instantActions.",
-                                    "enum": [
-                                        "time",
-                                        "distance"
-                                    ]
-                                },
-                                "triggerPointValue": {
-                                    "type": "number",
-                                    "title": "triggerPointValue",
-                                    "description": "Specifies the time in seconds or distance in emters after passing a node until the action is triggered. Default is 0. Negative values describe positions before the node.\nOptional:\nCan be omitted if not needed.\nCannot be used for edges.\nCannot be used for instantActions."
-                                },
-                                "durationType": {
-                                    "type": "string",
-                                    "title": "durationType",
-                                    "description": "Actions can last for a certain time, or distance, or can be repeated a certain number of times.\nOptional:\nCannot be used for edges.",
-                                    "enum": [
-                                        "time",
-                                        "distance",
-                                        "count"
-                                    ]
-                                },
-                                "durationValue": {
-                                    "type": "number",
-                                    "title": "durationValue",
-                                    "description": "Specifies the time in seconds or distance in meters that the action has to continue. For count: Specifies how many times the action has to be repeated."
-                                },
                                 "actionParameters": {
                                     "type": "array",
                                     "description": "Array of actionParameter-objects for the indicated action e. g. deviceId, loadId, external Triggers.",
