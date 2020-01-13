@@ -1,10 +1,9 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "systemState.json"   "title": "systemState",
+    "title": "state",
     "description": "all encompassing systemState of the AGV",
-    "subtopic": "/systemState",
-    "publisher": true,
-    "subscriber": false,
+    "subtopic": "/state",
+    "documentVersion": "1.0.0",
     "type": "object",
     "properties": {
         "headerId": {

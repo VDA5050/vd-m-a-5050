@@ -3,7 +3,7 @@
     "title": "Order Message",
     "description": "A message to communicate a new order from the Master to the AGV",
     "subtopic": "/order",
-    "documentVersion": "0.806",
+    "documentVersion": "1.0.0",
     "type": "object",
     "properties": {
         "headerId": {
