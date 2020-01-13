@@ -1,6 +1,5 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "#/order",
     "title": "Order Message",
     "description": "The message schema to communicate orders from master control to the AGV.\nDocument Version: 4.0.0",
     "subtopic": "/order",
@@ -54,7 +53,6 @@
         "nodes": {
             "title": "List of Nodes",
             "description": "This list holds the base and the horizon nodes of the order graph.",
-            "$id": "#/order/nodes",
             "type": "array",
             "items": {
                 "type": "object",
@@ -96,7 +94,6 @@
                         "title": "nodePosition",
                         "description": "Defines the position on a map in world coordinates. Each floor has its own map. Precision is up to the specific implementation",
                         "type": "object",
-                        "$id": "#/order/nodes/nodePosition",
                         "required": [
                             "x",
                             "y",
@@ -137,12 +134,10 @@
                     },
                     "actions": {
                         "title": "actions",
-                        "$id": "#actions",
                         "description": "Array of actions that are to be executed on the node. Their sequence in the list governs their sequence of execution.",
                         "type": "array",
                         "items": {
                             "type": "object",
-                            "$id": "#action",
                             "title": "nodeAction",
                             "description": "nodeAction",
                             "required": [
@@ -374,12 +369,10 @@
                     },
                     "actions": {
                         "title": "Actions",
-                        "$id": "#actions",
                         "description": "Array of action objects with detailed information.",
                         "type": "array",
                         "items": {
                             "type": "object",
-                            "$id": "#edgeAction",
                             "title": "edgeAction",
                             "description": "edgeAction",
                             "required": [
