@@ -1,6 +1,5 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "#state",
     "title": "state",
     "description": "all encompassing state of the AGV. Document version: 4.0.0",
     "documentVersion": "4.0.0",
@@ -82,7 +81,6 @@
             "items": {
                 "type": "object",
                 "title": "nodeState",
-                "$id": "#/state/nodeState",
                 "properties": {
                     "nodeId": {
                         "type": "string",
@@ -139,7 +137,6 @@
             "items": {
                 "type": "object",
                 "title": "edgeState",
-                "$id": "#/state/edgeState",
                 "properties": {
                     "edgeId": {
                         "type": "string",
@@ -217,7 +214,6 @@
         "agvPosition": {
             "type": "object",
             "title": "agvPosition",
-            "$id": "#/state/position",
             "description": "The AGVs position",
             "properties": {
                 "x": {
@@ -279,7 +275,6 @@
             "description": "Array for information about the loads that an AGV currently carries, if the AGV has any information about them. This array is optional: if an AGV cannot reason about its load state, it shall not send this field. If an empty field is sent, MC is to assume that the AGV can reason about its load state and that the AGV currently does not carry a load.",
             "items": {
                 "type": "object",
-                "$id": "#/state/load",
                 "description": "Load object that describes the load if the AGV has information about it.",
                 "title": "load",
                 "properties": {
@@ -354,7 +349,6 @@
             "items": {
                 "type": "object",
                 "title": "actionState",
-                "$id": "#/state/currentActions",
                 "properties": {
                     "actionId": {
                         "type": "string",
@@ -431,7 +425,6 @@
             "items": {
                 "type": "object",
                 "title": "Error",
-                "$id": "#/state/errors",
                 "properties": {
                     "errorType": {
                         "type": "string",
