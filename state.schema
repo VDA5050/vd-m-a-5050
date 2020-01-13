@@ -417,20 +417,17 @@
         }
     },
     "required": [
-        "sequenceID",
-        "timestamp",
+        "headerId",
+        "timeStamp",
         "version",
-        "orderID",
+        "orderId",
         "lastNode",
         "nodeStates",
         "edgeStates",
-        "postition",
         "currentActions",
-        "batteryCharge",
-        "charging",
+        "batteryInformation",
         "operatingMode",
         "errors",
-        "eStop",
-        "fieldViolation"
+        "safetyStatus"
     ]
 }

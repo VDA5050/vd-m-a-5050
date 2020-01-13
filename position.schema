@@ -1,0 +1,82 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "position",
+    "description": "",
+    "subtopic": "/position",
+    "documentVersion": "1.0.0",
+    "type": "object",
+    "required": [
+        "headerId",
+        "timeStamp",
+        "version",
+        "manufacturer",
+        "serialNumber",
+        "agvPosition"
+    ],
+    "properties": {
+        "headerId": {
+            "type": "integer",
+            "description": "headerId of the message. The headerId is defined per topic and incremented by 1 with each sent (but not necessarily received) message. "
+        },
+        "timeStamp": {
+            "title": "Timestamp",
+            "description": "Timestamp in ISO8601 Format",
+            "type": "string"
+        },
+        "version": {
+            "title": "Protocol Version",
+            "description": "Major, Minor, Patch Version of the Protocol",
+            "type": "string"
+        },
+        "manufacturer": {
+            "type": "string",
+            "title": "manufacturer",
+            "description": "Hersteller des FTF"
+        },
+        "serialNumber": {
+            "type": "string",
+            "title": "serialNumber",
+            "description": "Seriennummer des FTF"
+        },
+        "agvPosition": {
+            "type": "object",
+            "description": "The AGVs position",
+            "required": [
+                "positionInitialized",
+                "x",
+                "y",
+                "theta",
+                "mapId"
+            ],
+            "properties": {
+                "positionInitialized": {
+                    "type": "boolean",
+                    "title": "positionInitialized",
+                    "description": "False: Position is not initialized.\nTrue: position is initialized."
+                },
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                },
+                "theta": {
+                    "type": "number"
+                },
+                "mapId": {
+                    "type": "string"
+                },
+                "localizationScore": {
+                    "type": "number",
+                    "title": "localizationScore",
+                    "description": "Describes the quality of the localization."
+                },
+                "deviationRange": {
+                    "type": "number",
+                    "title": "deviationRange",
+                    "description": "Value for the deviation range of the AGV in meters."
+                }
+            }
+        }
+    }
+}

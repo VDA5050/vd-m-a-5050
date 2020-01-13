@@ -361,8 +361,8 @@
         }
     },
     "required": [
-        "sequenceId",
-        "timestamp",
+        "headerId",
+        "timeStamp",
         "version",
         "orderId",
         "nodes",
