@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "lastWill",
+    "description": "",
+    "subtopic": "/lastWill",
+    "documentVersion": "1.0.0",
+    "type": "object",
+    "properties": {
+        "agv": {
+            "type": "string",
+            "title": "agv",
+            "description": "\"manufacturer/serialNumber\" -  this field identifies the AGV and must be identical with both the supplied manufacturer and serial number that are used to construct the AGV’s root topic"
+        },
+        "online": {
+            "type": "boolean",
+            "title": "online",
+            "description": "The message that is published as last will must set this value to false. Once the AGV comes back online, it must publish a message to its last will topic with this value set to true."
+        }
+    },
+    "required": [
+        "agv",
+        "online"
+    ]
+}
