@@ -350,7 +350,10 @@
                                 },
                                 "value": {}
                             },
-                            "readOnly": false
+                            "required": [
+                                "key",
+                                "value"
+                            ]
                         }
                     }
                 }
