@@ -1,0 +1,437 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "systemState.json"   "title": "systemState",
+    "description": "all encompassing systemState of the AGV",
+    "subtopic": "/systemState",
+    "publisher": true,
+    "subscriber": false,
+    "type": "object",
+    "properties": {
+        "headerId": {
+            "type": "integer"
+        },
+        "timestamp": {
+            "type": "string"
+        },
+        "version": {
+            "type": "string"
+        },
+        "orderId": {
+            "type": "string",
+            "description": "Unique order identification. 'none' if idle."
+        },
+        "lastNodeId": {
+            "type": "string",
+            "description": "nodeID of last reached node or current node."
+        },
+        "driving": {
+            "type": "boolean",
+            "title": "driving",
+            "description": "True: Indicates that the AGV is driving and/or rotating. False: indicates that the AGV is neither driving nor rotating."
+        },
+        "distanceSincelastNode": {
+            "type": "number",
+            "title": "distanceSincelastNode",
+            "description": "Distance since lat apssed node in meters."
+        },
+        "nodeStates": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "title": "nodeState",
+                "required": [
+                    "nodeId",
+                    "released"
+                ],
+                "properties": {
+                    "nodeId": {
+                        "type": "string",
+                        "description": "Unique node identification"
+                    },
+                    "nodeDescription": {
+                        "type": "string",
+                        "description": "Verbose node description"
+                    },
+                    "position": {
+                        "type": "object",
+                        "properties": {
+                            "x": {
+                                "type": "number"
+                            },
+                            "y": {
+                                "type": "number"
+                            },
+                            "theta": {
+                                "type": "number"
+                            },
+                            "mapId": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "released": {
+                        "type": "boolean",
+                        "description": "Whether the node is part of the base or the horizon"
+                    }
+                }
+            }
+        },
+        "edgeStates": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "title": "nodeState",
+                "required": [
+                    "edgeId",
+                    "released"
+                ],
+                "properties": {
+                    "edgeID": {
+                        "type": "string",
+                        "description": "Unique edge identification"
+                    },
+                    "edgeDescription": {
+                        "type": "string",
+                        "description": "Verbose Edge description"
+                    },
+                    "released": {
+                        "type": "boolean",
+                        "description": "Wether edge is part of base or horizon"
+                    }
+                }
+            }
+        },
+        "agvPosition": {
+            "type": "object",
+            "description": "The AGVs position",
+            "required": [
+                "positionInitialized",
+                "x",
+                "y",
+                "theta",
+                "mapId"
+            ],
+            "properties": {
+                "positionInitialized": {
+                    "type": "boolean",
+                    "title": "positionInitialized",
+                    "description": "False: Position is not initialized.\nTrue: position is initialized."
+                },
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                },
+                "theta": {
+                    "type": "number"
+                },
+                "mapId": {
+                    "type": "string"
+                },
+                "localizationScore": {
+                    "type": "number",
+                    "title": "localizationScore",
+                    "description": "Describes the quality of the localization."
+                },
+                "deviationRange": {
+                    "type": "number",
+                    "title": "deviationRange",
+                    "description": "Value for the deviation range of the AGV in meters."
+                }
+            }
+        },
+        "trajectory": {
+            "type": "object",
+            "title": "trajectory",
+            "description": "Trajectory as a NURBS",
+            "properties": {
+                "degree": {
+                    "type": "number",
+                    "title": "degree",
+                    "description": "Degree of the NURBS"
+                },
+                "knotVector": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "description": "Sequence of parameter values that determine where and how the control points affect the NURBS."
+                },
+                "controlPoints": {
+                    "type": "array",
+                    "title": "controlPoints",
+                    "description": "List of control points for the NURBS.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "x": {
+                                "type": "number"
+                            },
+                            "y": {
+                                "type": "number"
+                            },
+                            "mapId": {
+                                "type": "number"
+                            }
+                        },
+                        "required": [
+                            "x",
+                            "y",
+                            "mapId"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "degree",
+                "knotVector",
+                "controlPoints"
+            ]
+        },
+        "velocity": {
+            "type": "object",
+            "description": "Velocity in vehicle coordinates",
+            "properties": {
+                "vx": {
+                    "type": "number"
+                },
+                "vy": {
+                    "type": "number"
+                },
+                "omega": {
+                    "type": "number"
+                }
+            }
+        },
+        "loads": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "Load object that describes the load if the AGV has information about it.",
+                "title": "load",
+                "properties": {
+                    "loadId": {
+                        "type": "string",
+                        "description": "Unique identification number of the load (e. g. barcode or RFID)\nEmpty field if the AGV can identify the load but didn’t identify the load yet.\nOptional if the AGV has cannot identify the load."
+                    },
+                    "loadType": {
+                        "type": "string"
+                    },
+                    "loadPosition": {
+                        "type": "string",
+                        "description": "Indicates which load handling/carrying unit of the AGV is used, e. g. in case the AGV has multiple spots/positions to carry loads.\nFor example: “front”, “back”, “positionC1”, etc.\nOptional for vehicles with only one loadPosition."
+                    },
+                    "boundingBoxReference": {
+                        "type": "object",
+                        "description": "This point describes the loads position on the AGV in the vehicle coordinates. The boundingBoxReference point is in the middle of the footprint of the load, so length/2 and width/2.",
+                        "properties": {
+                            "x": {
+                                "type": "number"
+                            },
+                            "y": {
+                                "type": "number"
+                            },
+                            "z": {
+                                "type": "number"
+                            },
+                            "theta": {
+                                "type": "number"
+                            }
+                        },
+                        "required": [
+                            "x",
+                            "y",
+                            "z"
+                        ]
+                    },
+                    "loadDimensions": {
+                        "type": "object",
+                        "title": "loadDimensions",
+                        "description": "Dimensions of the load’s bounding box in meters. ",
+                        "properties": {
+                            "length": {
+                                "type": "number",
+                                "description": "Absolute length of the loads bounding box in meter."
+                            },
+                            "width": {
+                                "type": "number",
+                                "description": "Absolute width of the loads bounding box in meter."
+                            },
+                            "height": {
+                                "type": "number",
+                                "description": "Absolute height of the loads bounding box in meter.\nOptional:\nSet value only if known."
+                            }
+                        },
+                        "required": [
+                            "length",
+                            "width"
+                        ]
+                    },
+                    "weight": {
+                        "type": "number",
+                        "description": "Weight of load in kg"
+                    }
+                },
+                "required": [
+                    "loadId"
+                ]
+            }
+        },
+        "currentActions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "title": "currentAction",
+                "properties": {
+                    "actionId": {
+                        "type": "string",
+                        "description": "unique Action ID"
+                    },
+                    "actionDescription": {
+                        "type": "string",
+                        "description": "Additional information on the action."
+                    },
+                    "actionStatus": {
+                        "type": "string",
+                        "description": "error, waiting, initializing, running, finished"
+                    },
+                    "resultDescription": {
+                        "type": "string",
+                        "description": "Description of the result, e.g. the result of a rfid-read."
+                    }
+                }
+            }
+        },
+        "batteryInformation": {
+            "type": "object",
+            "title": "batteryState",
+            "description": "All information relating to the battery.",
+            "properties": {
+                "batteryCharge": {
+                    "type": "number",
+                    "description": "State of Charge:\nIf AGV only provides values for good or bad battery levels, these will be indicated as 20% (bad) and 80% (good)."
+                },
+                "batteryVoltage": {
+                    "type": "number",
+                    "description": "Battery voltage"
+                },
+                "batteryHealth": {
+                    "type": "number",
+                    "description": "State of health in percent."
+                },
+                "charging": {
+                    "type": "boolean",
+                    "description": "If true: Charging in progress."
+                },
+                "reach": {
+                    "type": "number",
+                    "description": "estimated reach with actual State of Charge"
+                }
+            },
+            "required": [
+                "batteryCharge",
+                "charging"
+            ]
+        },
+        "operatingMode": {
+            "type": "string",
+            "enum": [
+                "automatic",
+                "semi-automatic",
+                "manual",
+                "service",
+                "teachin"
+            ],
+            "description": "automatic, semi-automatic, manual, service, teachin"
+        },
+        "errors": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "title": "Error",
+                "properties": {
+                    "errorType": {
+                        "type": "string",
+                        "description": "Type of error."
+                    },
+                    "errorReferences": {
+                        "type": "array",
+                        "title": "errorReferences",
+                        "items": {
+                            "type": "object",
+                            "title": "errorReference",
+                            "description": "Object that holds the error reference (e.g. orderId, orderUpdateId, actionId...) as key-value pairs.",
+                            "properties": {
+                                "referenceKey": {
+                                    "type": "string"
+                                },
+                                "referenceValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "key",
+                                "value"
+                            ]
+                        }
+                    },
+                    "errorDescription": {
+                        "type": "string",
+                        "description": "Verbose description of error."
+                    },
+                    "errorLevel": {
+                        "type": "string",
+                        "description": "warning: AGV is ready to drive without human intervention \n fatal: AGV is not in running condition.",
+                        "enum": [
+                            "warning",
+                            "fatal"
+                        ]
+                    }
+                }
+            }
+        },
+        "safetyStatus": {
+            "type": "object",
+            "title": "safetyStatus",
+            "description": "",
+            "required": [
+                "eStop",
+                "fieldViolation"
+            ],
+            "properties": {
+                "eStop": {
+                    "type": "string",
+                    "description": "autoAck, manual, remote, none",
+                    "enum": [
+                        "autoAck",
+                        "manual",
+                        "remote",
+                        "none"
+                    ]
+                },
+                "fieldViolation": {
+                    "type": "boolean",
+                    "description": "Protective field violation"
+                }
+            }
+        }
+    },
+    "required": [
+        "sequenceID",
+        "timestamp",
+        "version",
+        "orderID",
+        "lastNode",
+        "nodeStates",
+        "edgeStates",
+        "postition",
+        "currentActions",
+        "batteryCharge",
+        "charging",
+        "operatingMode",
+        "errors",
+        "eStop",
+        "fieldViolation"
+    ]
+}
