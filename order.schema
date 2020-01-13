@@ -1,13 +1,12 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "order.schema",
     "title": "Order Message",
     "description": "A message to communicate a new order from the Master to the AGV",
     "subtopic": "/order",
     "documentVersion": "0.806",
     "type": "object",
     "properties": {
-        "sequenceID": {
+        "headerId": {
             "type": "integer",
             "description": "headerId of the message. The headerId is defined per topic and incremented by 1 with each sent (but not necessarily received) message. "
         },
@@ -21,9 +20,29 @@
             "description": "Major, Minor, Patch Version of the Protocol",
             "type": "string"
         },
-        "orderID": {
+        "manufacturer": {
+            "type": "string",
+            "title": "manufacturer",
+            "description": "Hersteller des FTF"
+        },
+        "serialNumber": {
+            "type": "string",
+            "title": "serialNumber",
+            "description": "Seriennummer des FTF"
+        },
+        "orderId": {
             "title": "Unique Order ID",
             "type": "string"
+        },
+        "orderUpdateId": {
+            "type": "string",
+            "title": "orderUpdateId",
+            "description": "orderUpdate identification. Is unique per orderId. If an order update is rejected, this field is to be passed in the rejection message"
+        },
+        "replace": {
+            "type": "boolean",
+            "title": "replace",
+            "description": "Indicates that previously released base nodes should be replaced by the base of this updated order. If this is not possible, the AGV returns an error code (see errors in topic “state”). The new base has to start at the following node from the current position which has not been traversed yet"
         },
         "nodes": {
             "title": "List of Nodes",
@@ -33,14 +52,15 @@
                 "type": "object",
                 "title": "node",
                 "required": [
-                    "nodeID",
+                    "nodeId",
+                    "sequenceId",
                     "released",
-                    "position",
-                    "actions"
+                    "nodePosition",
+                    "allowedDeviation"
                 ],
                 "properties": {
                     "nodeId": {
-                        "title": "nodeID",
+                        "title": "nodeId",
                         "type": "string",
                         "description": "Unique node identification number.",
                         "examples": [
@@ -48,17 +68,22 @@
                             "MONTAGE"
                         ]
                     },
+                    "sequenceId": {
+                        "type": "number",
+                        "title": "sequenceId",
+                        "description": "Id to track the sequence of nodes and edges in an order and to simplify order updates. The variable sequenceId runs across all nodes and edges of the same order and is reset when a new orderId is issued."
+                    },
                     "nodeDescription": {
                         "title": "nodeDescription",
                         "type": "string",
                         "description": "Verbose Node Description."
                     },
-                    "replaceBase": {
-                        "title": "replaceBase",
-                        "type": "boolean",
-                        "description": "Indicates that the node replaces a previously sent base node. If that is not possible, the AGV is to return an error code."
+                    "allowedDeviation": {
+                        "type": "number",
+                        "title": "allowedDeviation",
+                        "description": "Indicates how exact an AGV has to drive over a node in order for it to count as traversed.\n If = 0: no deviation is allowed (no deviation means within the normal tolerance of the AGV manufacturer).\n If > 0: allowed deviation-radius in meters. If the AGV passes a node within the deviation-radius, the node is considered to have been traversed."
                     },
-                    "position": {
+                    "nodePosition": {
                         "title": "Position",
                         "description": "Position Object for an AGV or a Node.",
                         "type": "object",
@@ -93,11 +118,6 @@
                             }
                         }
                     },
-                    "isExact": {
-                        "title": "isExact",
-                        "type": "boolean",
-                        "description": "If true, node has to be traversed exactly and cannot be skipped."
-                    },
                     "actions": {
                         "title": "actions",
                         "description": "Array of Unique action IDs which must be found in the action array",
@@ -117,7 +137,8 @@
                 "type": "object",
                 "title": "edge",
                 "required": [
-                    "edgeID",
+                    "edgeId",
+                    "sequenceId",
                     "released",
                     "startNode",
                     "endNode"
@@ -128,6 +149,11 @@
                         "title": "edgeID",
                         "description": "Unique edge identification"
                     },
+                    "sequenceId": {
+                        "type": "number",
+                        "title": "sequenceId",
+                        "description": ""
+                    },
                     "edgeDescription": {
                         "type": "string",
                         "title": "edgeDescription",
@@ -137,11 +163,6 @@
                         "type": "boolean",
                         "title": "released",
                         "description": "If true, the edge is part of the base plan. If false, the edge is part of the horizon plan."
-                    },
-                    "replaceBase": {
-                        "type": "boolean",
-                        "title": "replaceBase",
-                        "description": "If true, this edge replaces a previously sent base edge. If that is not possible, the AGV is to return an error code."
                     },
                     "startNode": {
                         "type": "string",
@@ -175,7 +196,7 @@
                     },
                     "direction": {
                         "type": "number",
-                        "title": "direction",
+                        "title": "string",
                         "description": "Sets direction at junctions for line-guided vehicles, to be defined initially (vehicle-individual)."
                     },
                     "rotationAllowed": {
@@ -194,26 +215,54 @@
                         "description": "Distance of the path from startNode to endNode. This value is used by line-guided AGVs to decrease their speed before reaching a stop position."
                     },
                     "trajectory": {
-                        "type": "array",
+                        "type": "object",
                         "title": "trajectory",
-                        "description": "Object that holds points for the calculation of a NURB-Spline.",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "x": {
-                                    "type": "number",
-                                    "title": "x",
-                                    "description": "x coordinate of Anchor Point"
+                        "description": "Trajectory as a NURBS",
+                        "properties": {
+                            "degree": {
+                                "type": "number",
+                                "title": "degree",
+                                "description": "Degree of the NURBS"
+                            },
+                            "knotVector": {
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
                                 },
-                                "y": {
-                                    "type": "number",
-                                    "title": "y",
-                                    "description": "y coordinate of anchor point"
+                                "description": "Sequence of parameter values that determine where and how the control points affect the NURBS."
+                            },
+                            "controlPoints": {
+                                "type": "array",
+                                "title": "controlPoints",
+                                "description": "List of control points for the NURBS.",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "x": {
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "type": "number"
+                                        },
+                                        "mapId": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "required": [
+                                        "x",
+                                        "y",
+                                        "mapId"
+                                    ]
                                 }
                             }
-                        }
+                        },
+                        "required": [
+                            "degree",
+                            "knotVector",
+                            "controlPoints"
+                        ]
                     },
-                    "actionList": {
+                    "actions": {
                         "type": "array",
                         "title": "actionList",
                         "description": "Array of ActionIDs to be performed on edge.",
@@ -233,16 +282,21 @@
                 "title": "Action Object",
                 "description": "Action Object",
                 "required": [
-                    "actionID"
+                    "actionId"
                 ],
                 "properties": {
-                    "actionID": {
+                    "actionId": {
                         "type": "string",
                         "title": "actionID",
                         "description": "Unique Action ID",
                         "examples": [
                             "lift_mo28s"
                         ]
+                    },
+                    "actionName": {
+                        "type": "string",
+                        "title": "actionName",
+                        "description": "Name of action from list of permitted actions for this AGV."
                     },
                     "actionDescription": {
                         "type": "string",
@@ -289,7 +343,14 @@
                     "actionParameter": {
                         "type": "array",
                         "items": {
-                            "type": "object"
+                            "type": "object",
+                            "properties": {
+                                "key": {
+                                    "type": "string"
+                                },
+                                "value": {}
+                            },
+                            "readOnly": false
                         }
                     }
                 }
@@ -297,10 +358,10 @@
         }
     },
     "required": [
-        "sequenceID",
+        "sequenceId",
         "timestamp",
         "version",
-        "orderID",
+        "orderId",
         "nodes",
         "edges"
     ]
