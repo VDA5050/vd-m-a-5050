@@ -446,8 +446,8 @@
                                 }
                             },
                             "required": [
-                                "key",
-                                "value"
+                                "referenceKey",
+                                "referenceValue"
                             ]
                         }
                     },
