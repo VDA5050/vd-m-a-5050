@@ -37,7 +37,7 @@
             "description": "Unique order identification of the current order or the previous finished order. The orderId is kept until a new order is received. Empty string (â€œâ€) if no previous orderId is available. "
         },
         "orderUpdateId": {
-            "type": "number",
+            "type": "integer",
             "description": "Order Update Identification to identify that an order update has been accepted by the AGV. â€œ0â€ if no previous orderUpdateId is available."
         },
         "zoneSetId": {
@@ -49,7 +49,7 @@
             "description": "nodeID of last reached node or, if AGV is currently on a node, current node (e. g. â€œnode7â€). Empty string (â€œâ€) if no lastNodeId is available."
         },
         "lastNodeSequenceId": {
-            "type": "number",
+            "type": "integer",
             "description": "sequenceId of the last reached node or, if the AGV is currently on a node, sequenceId of current node.\nâ€œ0â€ if no lastNodeSequenceId is available. "
         },
         "driving": {
@@ -87,7 +87,7 @@
                         "description": "Unique node identification"
                     },
                     "sequenceId": {
-                        "type": "number",
+                        "type": "integer",
                         "description": "sequenceId of the node."
                     },
                     "nodeDescription": {
@@ -143,7 +143,7 @@
                         "description": "Unique edge identification"
                     },
                     "sequenceId": {
-                        "type": "number",
+                        "type": "integer",
                         "description": "sequenceId of the edge."
                     },
                     "edgeDescription": {
@@ -159,7 +159,7 @@
                         "description": "The trajectory is to be communicated as a NURBS and is defined in chapter 5.4 Topic: Order (from master control to AGV).\nTrajectory segments are from the point where the AGV starts to enter the edge until the point where it reports that the next node was traversed. ",
                         "properties": {
                             "degree": {
-                                "type": "number",
+                                "type": "integer",
                                 "description": "The degree of the NURBS."
                             },
                             "knotVector": {
