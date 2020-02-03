@@ -386,7 +386,7 @@
                                     "description": "Enum of actions as described in the first column of \"Actions and Parameters\"\nIdentifies the function of the action."
                                 },
                                 "actionId": {
-                                    "type": "number",
+                                    "type": "string",
                                     "title": "actionId",
                                     "description": "ID to distinguish between multiple actions with the same name on the same node."
                                 },
