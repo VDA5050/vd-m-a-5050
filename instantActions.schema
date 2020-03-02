@@ -54,7 +54,7 @@
                         "description": "Enum of actions as described in the first column of \"Actions and Parameters\"\nIdentifies the function of the action."
                     },
                     "actionId": {
-                        "type": "number",
+                        "type": "string",
                         "title": "actionId",
                         "description": "ID to distinguish between multiple actions."
                     },
@@ -67,25 +67,10 @@
                         "title": "blockingType",
                         "description": "Regulates if the action is allowed to be executed during movement and/or parallel to other actions.\nnone: action can happen in parallel with others, including movement.\nsoft: action can happen simultaneously with others, but not while moving.\nhard: no other actions can be performed while this action is running.",
                         "enum": [
-                            "none",
-                            "soft",
-                            "hard"
+                            "NONE",
+                            "SOFT",
+                            "HARD"
                         ]
-                    },
-                    "durationType": {
-                        "type": "string",
-                        "title": "durationType",
-                        "description": "Actions can last for a certain time, or distance, or can be repeated a certain number of times.\nOptional:\nCannot be used for edges.",
-                        "enum": [
-                            "time",
-                            "distance",
-                            "count"
-                        ]
-                    },
-                    "durationValue": {
-                        "type": "number",
-                        "title": "durationValue",
-                        "description": "Specifies the time in seconds or distance in meters that the action has to continue. For count: Specifies how many times the action has to be repeated."
                     },
                     "actionParameters": {
                         "type": "array",
