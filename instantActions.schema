@@ -3,8 +3,6 @@
     "title": "instantActions",
     "description": "JSON Schema for publishing instantActions that the AGV is to execute as soon as they arrive.",
     "subtopic": "/instantActions",
-    "publisher": false,
-    "subscriber": true,
     "type": "object",
     "properties": {
         "headerId": {
