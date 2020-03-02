@@ -511,8 +511,8 @@
                         "type": "string",
                         "description": "Type of information",
                         "enum": [
-                            "info",
-                            "debug"
+                            "INFO",
+                            "DEBUG"
                         ]
                     }
                 }
