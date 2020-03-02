@@ -114,6 +114,18 @@
                                 "minimum": -3.14159265359,
                                 "maximum": 3.14159265359
                             },
+                            "allowedDeviationXy": {
+                                "title": "allowedDeviationXy",
+                                "type": "number",
+                                "description": "Indicates how exact an AGV has to drive over a node in order for it to count as traversed.\nIf = 0: no deviation is allowed (no deviation means within the normal tolerance of the AGV manufacturer).\nIf > 0: allowed deviation-radius in meters. If the AGV passes a node within the deviation-radius, the node is considered to have been traversed."
+                            },
+                            "allowedDeviationTheta": {
+                                "title": "allowedDeviationXy",
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 3.141592654,
+                                "description": "Indicates how exact an AGV has to align its orientation with the nodes theta. The value is interpreted as theta+-deviation.nIf = 0: no deviation is allowed (no deviation means within the normal tolerance of the AGV manufacturer)."
+                            },
                             "mapId": {
                                 "title": "mapId",
                                 "description": "Unique identification of the map in which the position is referenced.\nEach map has the same origin of coordinates. When an AGV uses an elevator, e. g. leading from a departure floor to a target floor, it will disappear off the map of the departure floor and spawn in the related lift node on the map of the target floor.",
@@ -125,11 +137,6 @@
                                 "type": "string"
                             }
                         }
-                    },
-                    "allowedDeviation": {
-                        "title": "allowedDeviation",
-                        "type": "number",
-                        "description": "Indicates how exact an AGV has to drive over a node in order for it to count as traversed.\nIf = 0: no deviation is allowed (no deviation means within the normal tolerance of the AGV manufacturer).\nIf > 0: allowed deviation-radius in meters. If the AGV passes a node within the deviation-radius, the node is considered to have been traversed."
                     },
                     "actions": {
                         "title": "actions",
