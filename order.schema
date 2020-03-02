@@ -43,7 +43,9 @@
         "orderUpdateId": {
             "title": "orderUpdateId",
             "description": "orderUpdate identification. Is unique per orderId. If an order update is rejected, this field is to be passed in the rejection message.",
-            "type": "number"
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967296
         },
         "zoneSetId": {
             "title": "zoneSetId",
@@ -76,7 +78,9 @@
                     },
                     "sequenceId": {
                         "title": "sequenceId",
-                        "type": "number",
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4294967296,
                         "description": "Id to track the sequence of nodes and edges in an order and to simplify order updates.\nThe main purpose is to distinguish between a node which is passed more than once within one orderId. The variable sequenceId can run across all nodes and edges of the same order and is reset when a new orderId is issued."
                     },
                     "nodeDescription": {
@@ -117,7 +121,8 @@
                             "allowedDeviationXy": {
                                 "title": "allowedDeviationXy",
                                 "type": "number",
-                                "description": "Indicates how exact an AGV has to drive over a node in order for it to count as traversed.\nIf = 0: no deviation is allowed (no deviation means within the normal tolerance of the AGV manufacturer).\nIf > 0: allowed deviation-radius in meters. If the AGV passes a node within the deviation-radius, the node is considered to have been traversed."
+                                "description": "Indicates how exact an AGV has to drive over a node in order for it to count as traversed.\nIf = 0: no deviation is allowed (no deviation means within the normal tolerance of the AGV manufacturer).\nIf > 0: allowed deviation-radius in meters. If the AGV passes a node within the deviation-radius, the node is considered to have been traversed.",
+                                "minimum": 0
                             },
                             "allowedDeviationTheta": {
                                 "title": "allowedDeviationXy",
@@ -246,7 +251,9 @@
                         "description": "Unique edge identification"
                     },
                     "sequenceId": {
-                        "type": "number",
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4294967296,
                         "title": "sequenceId",
                         "description": "Id to track the sequence of nodes and edges in an order and to simplify order updates. The variable sequenceId runs across all nodes and edges of the same order and is reset when a new orderId is issued."
                     },
@@ -323,7 +330,7 @@
                         "description": "Trajectory that an AGV has to follow on this edge. The trajectory is to be defined as a NURBS.",
                         "properties": {
                             "degree": {
-                                "type": "number",
+                                "type": "integer",
                                 "description": "The degree of the NURBS."
                             },
                             "knotVector": {
