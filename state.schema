@@ -459,8 +459,8 @@
                         "type": "string",
                         "description": "warning: AGV is ready to drive without human intervention \n fatal: AGV is not in running condition.",
                         "enum": [
-                            "warning",
-                            "fatal"
+                            "WARNING",
+                            "FATAL"
                         ]
                     }
                 }
@@ -468,6 +468,58 @@
             "required": [
                 "errorType",
                 "errorLevel"
+            ]
+        },
+        "information": {
+            "type": "array",
+            "title": "Information",
+            "description": "Array of information messages. Messages are only for visualization/debugging. There's no specification when these messages are deleted.",
+            "items": {
+                "type": "object",
+                "title": "Information",
+                "properties": {
+                    "infoType": {
+                        "type": "string",
+                        "description": "Type of Information."
+                    },
+                    "infoReferences": {
+                        "type": "array",
+                        "title": "infoReferences",
+                        "items": {
+                            "type": "object",
+                            "title": "infoReference",
+                            "description": "Object that holds the info reference (e.g. orderId, orderUpdateId, actionId...) as key-value pairs.",
+                            "properties": {
+                                "referenceKey": {
+                                    "type": "string"
+                                },
+                                "referenceValue": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "referenceKey",
+                                "referenceValue"
+                            ]
+                        }
+                    },
+                    "infoDescription": {
+                        "type": "string",
+                        "description": "Verbose description of error."
+                    },
+                    "infoLevel": {
+                        "type": "string",
+                        "description": "Type of information",
+                        "enum": [
+                            "info",
+                            "debug"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "infoType",
+                "infoLevel"
             ]
         },
         "safetyState": {
