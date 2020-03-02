@@ -68,11 +68,11 @@
             "type": "string",
             "description": "Current operating mode of the AGV.",
             "enum": [
-                "automatic",
-                "semi-automatic",
-                "manual",
-                "service",
-                "teachin"
+                "AUTOMATIC",
+                "SEMI-AUTOMATIC",
+                "MANUAL",
+                "SERVICE",
+                "TEACHIN"
             ]
         },
         "nodeStates": {
