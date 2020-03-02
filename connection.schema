@@ -38,9 +38,9 @@
         "connectionState": {
             "type": "string",
             "enum": [
-                "online",
-                "offline",
-                "connectionBroken"
+                "ONLINE",
+                "OFFLINE",
+                "CONNECTIONBROKEN"
             ],
             "description": "online: connection between AGV and broker is active.\noffline: connection between AGV and broker has gone offline in a coordinated way.\nconnectionBroken: The connection between AGV and broker has unexpectedly ended."
         }
