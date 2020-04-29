@@ -73,7 +73,7 @@
             "description": "Current operating mode of the AGV.",
             "enum": [
                 "AUTOMATIC",
-                "SEMI-AUTOMATIC",
+                "SEMIAUTOMATIC",
                 "MANUAL",
                 "SERVICE",
                 "TEACHIN"
