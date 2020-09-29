@@ -63,7 +63,6 @@
                     "nodeId",
                     "sequenceId",
                     "released",
-                    "allowedDeviation",
                     "actions"
                 ],
                 "properties": {
