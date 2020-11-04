@@ -50,6 +50,8 @@
         },
         "lastNodeSequenceId": {
             "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967296,
             "description": "sequenceId of the last reached node or, if the AGV is currently on a node, sequenceId of current node.\nâ€œ0â€ if no lastNodeSequenceId is available. "
         },
         "driving": {
