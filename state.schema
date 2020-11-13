@@ -565,7 +565,6 @@
         "nodeStates",
         "edgeStates",
         "driving",
-        "paused",
         "actionStates",
         "batteryState",
         "operatingMode",
