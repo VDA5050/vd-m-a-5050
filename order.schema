@@ -90,7 +90,7 @@
                     "released": {
                         "type": "boolean",
                         "title": "released",
-                        "description": "If true, the edge is part of the base plan. If false, the edge is part of the horizon plan."
+                        "description": "If true, the node is part of the base plan. If false, the node is part of the horizon plan."
                     },
                     "nodePosition": {
                         "title": "nodePosition",
