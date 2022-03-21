@@ -1,3 +1,9 @@
+# Deprecated Repository, only for posterity
+
+Since the schemas proved to be useful, they are now part of the official specification repository and can be found at:
+https://github.com/VDA5050/VDA5050
+
+
 # vd-m-a-5050
 JSON Schemas for the use with the VD(M)A 5050 protocol.
 
